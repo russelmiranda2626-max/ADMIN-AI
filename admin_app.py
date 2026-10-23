@@ -25,9 +25,14 @@ app.config.update(
     PERMANENT_SESSION_LIFETIME=timedelta(hours=12),
 )
 
-_db_url = os.getenv('DATABASE_URL') or 'sqlite:///' + os.path.join(HERE, 'kusina.db')
+# Ayusin ang DATABASE_URL para maiwasan ang Windows absolute path error sa Render (Linux)
+_db_url = os.getenv('DATABASE_URL')
+if not _db_url or 'C:/' in _db_url or 'c:/' in _db_url or '\\' in _db_url:
+    _db_url = 'sqlite:///' + os.path.join(HERE, 'kusina.db')
+
 if _db_url.startswith('postgres://'):
     _db_url = _db_url.replace('postgres://', 'postgresql://', 1)
+
 app.config['SQLALCHEMY_DATABASE_URI'] = _db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_pre_ping': True}
