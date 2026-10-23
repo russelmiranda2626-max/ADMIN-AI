@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KusinaAI - Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary:#f97316; --primary-dark:#ea580c; --primary-light:#fff7ed; --primary-soft:#ffedd5; --bg:#fffaf5; --ink:#1c1917; --muted:#78716c; --line:#ece7e2; --danger:#b91c1c; }
+        * { box-sizing:border-box; margin:0; padding:0; font-family:'Plus Jakarta Sans',sans-serif; }
+        body { background:var(--bg); color:var(--ink); line-height:1.5; padding-bottom:60px; }
+        .navbar { background:rgba(255,250,245,.92); backdrop-filter:blur(12px); position:sticky; top:0; z-index:50; border-bottom:1px solid var(--line); padding:.8rem 1.5rem; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+        .brand { display:flex; align-items:center; gap:10px; font-weight:800; font-size:1.25rem; }
+        .brand .mark { width:36px; height:36px; border-radius:11px; display:grid; place-items:center; color:#fff; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); }
+        .brand b { color:var(--primary-dark); }
+        .pill { background:var(--primary-soft); color:var(--primary-dark); font-size:.7rem; font-weight:800; padding:3px 10px; border-radius:20px; text-transform:uppercase; letter-spacing:.05em; }
+        .btn-nav { background:#fff; color:var(--danger); border:1.5px solid #fecaca; padding:.45rem 1rem; border-radius:30px; font-weight:700; font-size:.85rem; text-decoration:none; display:inline-flex; gap:8px; align-items:center; }
+        .btn-nav:hover { background:#ef4444; color:#fff; }
+        .lang-switch { display:flex; background:#fff; border:1.5px solid #fed7aa; border-radius:30px; padding:3px; }
+        .lang-switch button { border:none; background:transparent; color:var(--muted); font-weight:800; font-size:.78rem; padding:5px 12px; border-radius:30px; cursor:pointer; }
+        .lang-switch button.active { background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:#fff; box-shadow:0 4px 10px rgba(249,115,22,.3); }
+        .container { max-width:1150px; margin:1.5rem auto; padding:0 1.2rem; }
+        h1 { font-family:'Fraunces',serif; font-size:2rem; font-weight:800; letter-spacing:-.02em; }
+        .sub { color:var(--muted); margin-bottom:1.2rem; }
+        .tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:1.2rem; }
+        .tabs button { border:1.5px solid #fed7aa; background:#fff; color:var(--primary-dark); font-weight:800; padding:9px 16px; border-radius:14px; cursor:pointer; font-size:.88rem; display:flex; gap:8px; align-items:center; }
+        .tabs button.active { background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:#fff; border-color:var(--primary); box-shadow:0 6px 16px rgba(249,115,22,.3); }
+        .tab { display:none; } .tab.active { display:block; }
+        .card { background:#fff; border:1px solid var(--line); border-radius:20px; padding:1.3rem; box-shadow:0 1px 2px rgba(28,25,23,.04),0 2px 8px rgba(28,25,23,.04); margin-bottom:1.2rem; }
+        .card h3 { font-family:'Fraunces',serif; font-size:1.25rem; font-weight:800; margin-bottom:.8rem; display:flex; align-items:center; gap:10px; }
+        .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:1.2rem; }
+        .stat { background:#fff; border:1px solid var(--line); border-radius:16px; padding:14px; }
+        .stat b { display:block; font-family:'Fraunces',serif; font-size:1.9rem; color:var(--primary-dark); line-height:1.1; }
+        .stat span { font-size:.72rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+        input, select, textarea { width:100%; padding:11px 13px; border-radius:12px; border:1.5px solid var(--line); font-size:.92rem; outline:none; background:#fff; margin-bottom:12px; }
+        textarea { resize:vertical; min-height:90px; }
+        input:focus, select:focus, textarea:focus { border-color:var(--primary); box-shadow:0 0 0 4px rgba(249,115,22,.13); }
+        label { display:block; font-size:.78rem; font-weight:700; margin-bottom:5px; color:#44403c; }
+        .btn { border:none; border-radius:12px; padding:11px 18px; font-weight:800; cursor:pointer; font-size:.9rem; display:inline-flex; gap:8px; align-items:center; justify-content:center; transition:.2s; }
+        .btn-primary { background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:#fff; box-shadow:0 8px 18px rgba(249,115,22,.3); }
+        .btn-soft { background:var(--primary-soft); color:var(--primary-dark); }
+        .btn-danger { background:#fff; color:var(--danger); border:1.5px solid #fecaca; }
+        .btn-danger:hover { background:#ef4444; color:#fff; }
+        .btn:disabled { opacity:.6; cursor:wait; }
+        .btn-sm { padding:6px 12px; font-size:.78rem; border-radius:10px; }
+        table { width:100%; border-collapse:collapse; font-size:.88rem; }
+        th { text-align:left; font-size:.7rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); padding:8px 10px; border-bottom:1px solid var(--line); }
+        td { padding:11px 10px; border-bottom:1px dashed #e7e0d9; vertical-align:middle; }
+        .tbl-wrap { overflow-x:auto; }
+        .avatar { width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,var(--primary),#9a3412); color:#fff; display:inline-grid; place-items:center; font-weight:800; font-size:.78rem; margin-right:10px; vertical-align:middle; }
+        .muted { color:var(--muted); font-size:.82rem; }
+        .empty { text-align:center; color:var(--muted); padding:2rem 1rem; }
+        .grid2 { display:grid; grid-template-columns:1.3fr 1fr; gap:1.2rem; align-items:start; }
+        .row2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        .rl { display:flex; justify-content:space-between; gap:8px; padding:8px 0; border-bottom:1px dashed #e7e0d9; font-size:.86rem; }
+        .bar { height:8px; border-radius:8px; background:var(--primary-soft); margin-top:4px; } .bar i { display:block; height:100%; border-radius:8px; background:var(--primary); }
+        .modal-overlay { position:fixed; inset:0; background:rgba(28,25,23,.55); backdrop-filter:blur(4px); display:none; justify-content:center; align-items:center; z-index:200; padding:1rem; }
+        .modal-card { background:#fff; width:100%; max-width:560px; border-radius:22px; padding:1.5rem; max-height:88vh; overflow-y:auto; position:relative; box-shadow:0 30px 70px rgba(0,0,0,.3); }
+        .close-x { position:absolute; top:14px; right:14px; width:34px; height:34px; border-radius:50%; background:#f5f5f4; display:grid; place-items:center; cursor:pointer; }
+        .close-x:hover { background:var(--primary); color:#fff; }
+        .plan-day { margin-bottom:8px; font-size:.86rem; } .plan-day b { color:var(--primary-dark); }
+        .chat-box { height:420px; overflow-y:auto; background:#fdf9f5; border:1px solid var(--line); border-radius:16px; padding:12px; display:flex; flex-direction:column; gap:10px; margin-bottom:10px; }
+        .msg { max-width:85%; padding:10px 14px; border-radius:16px; font-size:.9rem; word-break:break-word; }
+        .msg.user { align-self:flex-end; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:#fff; border-bottom-right-radius:4px; }
+        .msg.ai { align-self:flex-start; background:#fff; border:1px solid var(--line); border-bottom-left-radius:4px; }
+        .chat-row { display:flex; gap:8px; } .chat-row input { margin:0; }
+        .quick { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+        .quick button { border:1px solid #fed7aa; background:#fff; color:var(--primary-dark); border-radius:20px; padding:5px 12px; font-size:.76rem; font-weight:700; cursor:pointer; }
+        .note { background:var(--primary-light); border:1px solid #fed7aa; color:#9a3412; border-radius:12px; padding:10px 14px; font-size:.82rem; margin-bottom:12px; }
+        .toast { position:fixed; left:50%; bottom:28px; transform:translateX(-50%) translateY(20px); opacity:0; background:#1c1917; color:#fff; padding:12px 20px; border-radius:14px; font-weight:700; font-size:.9rem; z-index:300; transition:.3s; pointer-events:none; max-width:calc(100vw - 32px); }
+        .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+        @media (max-width:860px) { .grid2, .row2 { grid-template-columns:1fr; } .navbar { padding:.7rem 1rem; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="brand"><div class="mark"><i class="fa-solid fa-utensils"></i></div> Kusina<b>AI</b> <span class="pill">Admin</span></div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <div class="lang-switch" role="group" aria-label="Language">
+                <button id="lang-tl" onclick="setLang('tl')">TL</button>
+                <button id="lang-en" onclick="setLang('en')">EN</button>
+            </div>
+            <span class="muted">{{ admin_name }}</span>
+            <a href="/admin/logout" class="btn-nav"><i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="logout"></span></a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <h1>Admin Panel</h1>
+        <p class="sub" data-i18n="sub"></p>
+
+        <div class="tabs" id="tabs">
+            <button data-tab="overview" class="active"><i class="fa-solid fa-chart-simple"></i> <span data-i18n="tab_overview"></span></button>
+            <button data-tab="users"><i class="fa-solid fa-users"></i> <span data-i18n="tab_users"></span></button>
+            <button data-tab="dishes"><i class="fa-solid fa-utensils"></i> <span data-i18n="tab_dishes"></span></button>
+            <button data-tab="recipes"><i class="fa-solid fa-book-open"></i> <span data-i18n="tab_recipes"></span></button>
+            <button data-tab="chat"><i class="fa-solid fa-robot"></i> <span data-i18n="tab_bot"></span></button>
+        </div>
+
+        <section class="tab active" id="tab-overview">
+            <div class="stats" id="stats"></div>
+            <div class="card"><h3><i class="fa-solid fa-user-plus" style="color:var(--primary)"></i> <span data-i18n="recent_title"></span></h3><div id="ovRecent"></div></div>
+        </section>
+
+        <section class="tab" id="tab-users">
+            <div class="card">
+                <h3><i class="fa-solid fa-users" style="color:var(--primary)"></i> <span data-i18n="tab_users"></span></h3>
+                <input type="text" id="userSearch" data-i18n-ph="search_ph" oninput="debounceUsers()">
+                <div class="tbl-wrap"><table>
+                    <thead><tr><th data-i18n="th_user"></th><th data-i18n="th_joined"></th><th data-i18n="th_week"></th><th data-i18n="th_all"></th><th data-i18n="th_favs"></th><th></th></tr></thead>
+                    <tbody id="userRows"></tbody>
+                </table></div>
+            </div>
+        </section>
+
+        <section class="tab" id="tab-dishes">
+            <div class="card">
+                <h3><i class="fa-solid fa-fire" style="color:var(--primary)"></i> <span data-i18n="dishes_title"></span></h3>
+                <div class="note" data-i18n="dishes_note"></div>
+                <div id="topDishes"></div>
+            </div>
+        </section>
+
+        <section class="tab" id="tab-recipes">
+            <div class="grid2">
+                <div class="card">
+                    <h3><i class="fa-solid fa-plus" style="color:var(--primary)"></i> <span data-i18n="add_title"></span></h3>
+                    <label data-i18n="r_title"></label>
+                    <input type="text" id="rTitle" data-i18n-ph="r_title_ph">
+                    <button class="btn btn-soft btn-sm" id="aiFillBtn" onclick="aiFill()" style="margin-bottom:14px"></button>
+                    <div class="row2">
+                        <div><label data-i18n="r_cat"></label><input type="text" id="rCategory" list="catList" placeholder="Ulam"><datalist id="catList"></datalist></div>
+                        <div><label data-i18n="r_budget"></label><select id="rBudget"><option>Mura / Budget-Friendly</option><option selected>Katamtaman</option><option>Espesyal</option></select></div>
+                    </div>
+                    <label data-i18n="r_best"></label>
+                    <input type="text" id="rBest" placeholder="Tanghalian / Pang-araw-araw">
+                    <label data-i18n="r_ingr"></label>
+                    <textarea id="rIngr" data-i18n-ph="r_ingr_ph"></textarea>
+                    <label data-i18n="r_instr"></label>
+                    <textarea id="rInstr" style="min-height:150px" data-i18n-ph="r_instr_ph"></textarea>
+                    <label data-i18n="r_img"></label>
+                    <input type="text" id="rImg" data-i18n-ph="r_img_ph">
+                    <button class="btn btn-primary" id="saveRecipeBtn" onclick="saveRecipe()"><i class="fa-solid fa-floppy-disk"></i> <span data-i18n="r_save"></span></button>
+                </div>
+                <div class="card">
+                    <h3><i class="fa-solid fa-list" style="color:var(--primary)"></i> <span data-i18n="latest"></span> <span class="muted" id="recTotal"></span></h3>
+                    <div class="note" data-i18n="rec_note"></div>
+                    <div id="recList"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="tab" id="tab-chat">
+            <div class="card">
+                <h3><i class="fa-solid fa-robot" style="color:var(--primary)"></i> <span data-i18n="tab_bot"></span></h3>
+                <div class="quick">
+                    <button onclick="quickAsk('q1_full')" data-i18n="q1"></button>
+                    <button onclick="quickAsk('q2_full')" data-i18n="q2"></button>
+                    <button onclick="quickAsk('q3_full')" data-i18n="q3"></button>
+                </div>
+                <div class="chat-box" id="chatBox"><div class="msg ai" id="botHello"></div></div>
+                <div class="chat-row">
+                    <input type="text" id="chatInput" data-i18n-ph="bot_ph" onkeypress="if(event.key==='Enter') sendChat()">
+                    <button class="btn btn-primary" onclick="sendChat()"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal-overlay" id="userModal" onclick="if(event.target===this) closeModal('userModal')">
+        <div class="modal-card"><div class="close-x" onclick="closeModal('userModal')"><i class="fa-solid fa-xmark"></i></div><div id="userDetail"></div></div>
+    </div>
+    <div class="modal-overlay" id="delModal" onclick="if(event.target===this) closeModal('delModal')">
+        <div class="modal-card" style="max-width:400px">
+            <div class="close-x" onclick="closeModal('delModal')"><i class="fa-solid fa-xmark"></i></div>
+            <h3 style="font-family:'Fraunces',serif;font-size:1.3rem;margin-bottom:8px" data-i18n="del_title"></h3>
+            <p id="delText" class="muted" style="margin-bottom:16px"></p>
+            <div style="display:flex;gap:8px"><button class="btn btn-danger" onclick="confirmDelete()" style="flex:1"><i class="fa-solid fa-trash"></i> <span data-i18n="del_btn"></span></button><button class="btn btn-soft" onclick="closeModal('delModal')" data-i18n="cancel"></button></div>
+        </div>
+    </div>
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const $ = id => document.getElementById(id);
+        const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+        const DAYS = ['Lunes', 'Martes', 'Miyerkules', 'Huwebes', 'Biyernes', 'Sabado', 'Linggo'];
+        const MEALS = ['Almusal', 'Tanghalian', 'Hapunan'];
+        const DAY_EN = { Lunes: 'Monday', Martes: 'Tuesday', Miyerkules: 'Wednesday', Huwebes: 'Thursday', Biyernes: 'Friday', Sabado: 'Saturday', Linggo: 'Sunday' };
+        const MEAL_EN = { Almusal: 'Breakfast', Tanghalian: 'Lunch', Hapunan: 'Dinner' };
+
+        const I18N = {
+            tl: {
+                logout: 'Logout',
+                sub: 'Tingnan ang mga account, ang mga nilalagay nilang ulam, magdagdag ng resipe, at magtanong sa Admin Bot.',
+                tab_overview: 'Overview', tab_users: 'Mga Account', tab_dishes: 'Ginagawa ng Users', tab_recipes: 'Resipe', tab_bot: 'Admin Bot',
+                st_users: 'Kabuuang user', st_new: 'Bago (7 araw)', st_planning: 'May plano sa kalendaryo', st_recipes: 'Resipe', st_favs: 'Favorites',
+                recent_title: 'Pinakabagong sumali', no_users: 'Wala pang user.',
+                search_ph: 'Hanapin ang pangalan o email...',
+                th_user: 'User', th_joined: 'Sumali', th_week: 'Ulam (linggo)', th_all: 'Ulam (lahat)', th_favs: 'Favorites',
+                view: 'Tingnan', no_match: 'Walang nahanap na account.',
+                dishes_title: 'Pinakamadalas ilagay sa kalendaryo',
+                dishes_note: 'Ito ang nakikita mula sa database: ang mga ulam na nilalagay ng users sa kalendaryo nila. Hindi nito nakikita ang mga tanong nila sa AI Chef.',
+                no_dishes: 'Wala pang ulam sa mga kalendaryo.',
+                add_title: 'Magdagdag ng resipe', r_title: 'Pangalan ng ulam *', r_title_ph: 'Halimbawa: Sinigang na Baboy sa Sampalok',
+                ai_fill: 'Punan gamit ang AI', ai_wait: 'Sandali...',
+                r_cat: 'Category', r_budget: 'Budget', r_best: 'Best for',
+                r_ingr: 'Mga sangkap * (paghiwalayin ng espasyo)', r_ingr_ph: 'manok toyo suka bawang sibuyas paminta',
+                r_instr: 'Paraan ng pagluluto * (isang hakbang bawat linya)', r_instr_ph: '1. Igisa ang bawang...\n2. Ilagay ang manok...',
+                r_img: 'Larawan (opsyonal, hal. /static/images/adobo.jpg)', r_img_ph: 'Iwanang blangko para Wikipedia ang maghanap',
+                r_save: 'I-save ang resipe', latest: 'Pinakabago', total: '({n} lahat)',
+                rec_note: 'Isinusulat sa recipes.csv. Lalabas sa main site pagkatapos i-restart ito.', no_csv: 'Hindi makita ang recipes.csv.',
+                q1: 'Ilan ang users?', q2: 'Paboritong ulam', q3: 'Pinakaaktibo',
+                q1_full: 'Ilan ang users at sino ang pinakabagong sumali?', q2_full: 'Ano ang pinakamadalas na ulam sa mga kalendaryo?', q3_full: 'Sino ang pinakaaktibong user?',
+                bot_hello: 'Kumusta, admin! Ano ang gusto mong malaman tungkol sa site?', bot_ph: 'Magtanong...',
+                cal_week: 'Kalendaryo ngayong linggo', past_weeks: 'Mga nakaraang linggo', week_of: 'Linggo ng {d}',
+                no_dishes_user: 'Walang ulam.', joined_on: 'sumali {d}',
+                del_title: 'Burahin ang account?', del_text: 'Buburahin ang account ni {name}, pati ang kalendaryo at favorites niya. Hindi ito mababawi.',
+                del_btn: 'Burahin', cancel: 'Kanselahin',
+                t_deleted: 'Nabura na ang account.', t_title_first: 'Ilagay muna ang pangalan ng ulam.',
+                t_filled: 'Napunan na. Tingnan at i-edit bago i-save.', t_added: 'Naidagdag na: {title}',
+                err_conn: 'Walang koneksyon sa server.', err_generic: 'May error.'
+            },
+            en: {
+                logout: 'Logout',
+                sub: 'View accounts, see what they plan to cook, add recipes, and ask the Admin Bot.',
+                tab_overview: 'Overview', tab_users: 'Accounts', tab_dishes: 'User Activity', tab_recipes: 'Recipes', tab_bot: 'Admin Bot',
+                st_users: 'Total users', st_new: 'New (7 days)', st_planning: 'With a meal plan', st_recipes: 'Recipes', st_favs: 'Favorites',
+                recent_title: 'Latest sign-ups', no_users: 'No users yet.',
+                search_ph: 'Search name or email...',
+                th_user: 'User', th_joined: 'Joined', th_week: 'Dishes (week)', th_all: 'Dishes (all)', th_favs: 'Favorites',
+                view: 'View', no_match: 'No accounts found.',
+                dishes_title: 'Most planned dishes',
+                dishes_note: 'This comes from the database: the dishes users put on their calendars. It does not include what they ask the AI Chef.',
+                no_dishes: 'No dishes on any calendar yet.',
+                add_title: 'Add a recipe', r_title: 'Dish name *', r_title_ph: 'Example: Pork Sinigang with Tamarind',
+                ai_fill: 'Fill with AI', ai_wait: 'Please wait...',
+                r_cat: 'Category', r_budget: 'Budget', r_best: 'Best for',
+                r_ingr: 'Ingredients * (separated by spaces)', r_ingr_ph: 'manok toyo suka bawang sibuyas paminta',
+                r_instr: 'Instructions * (one step per line)', r_instr_ph: '1. Saute the garlic...\n2. Add the chicken...',
+                r_img: 'Image (optional, e.g. /static/images/adobo.jpg)', r_img_ph: 'Leave blank to let Wikipedia find one',
+                r_save: 'Save recipe', latest: 'Latest', total: '({n} total)',
+                rec_note: 'Saved to recipes.csv. It shows up on the main site after you restart it.', no_csv: 'recipes.csv not found.',
+                q1: 'How many users?', q2: 'Favorite dishes', q3: 'Most active',
+                q1_full: 'How many users are there and who joined most recently?', q2_full: 'What are the most planned dishes on the calendars?', q3_full: 'Who is the most active user?',
+                bot_hello: 'Hello, admin! What would you like to know about the site?', bot_ph: 'Ask something...',
+                cal_week: 'Calendar this week', past_weeks: 'Past weeks', week_of: 'Week of {d}',
+                no_dishes_user: 'No dishes.', joined_on: 'joined {d}',
+                del_title: 'Delete this account?', del_text: "This deletes {name}'s account, calendar, and favorites. It cannot be undone.",
+                del_btn: 'Delete', cancel: 'Cancel',
+                t_deleted: 'Account deleted.', t_title_first: 'Enter the dish name first.',
+                t_filled: 'Filled in. Review and edit before saving.', t_added: 'Added: {title}',
+                err_conn: 'Could not reach the server.', err_generic: 'Something went wrong.'
+            }
+        };
+
+        let lang = 'tl';
+        try { lang = localStorage.getItem('kusina_lang') === 'en' ? 'en' : 'tl'; } catch (e) {}
+        function t(k, v) {
+            let s = (I18N[lang] && I18N[lang][k]) || I18N.tl[k] || k;
+            if (v) for (const x in v) s = s.replace('{' + x + '}', v[x]);
+            return s;
+        }
+        const dayL = d => lang === 'en' ? (DAY_EN[d] || d) : d;
+        const mealL = m => lang === 'en' ? (MEAL_EN[m] || m) : m;
+
+        function applyLang() {
+            document.documentElement.lang = lang;
+            document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+            document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+            $('lang-tl').classList.toggle('active', lang === 'tl');
+            $('lang-en').classList.toggle('active', lang === 'en');
+            const b = $('aiFillBtn'); if (!b.disabled) b.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> ' + esc(t('ai_fill'));
+            if (!chatHist.length) $('botHello').textContent = t('bot_hello');
+        }
+        function setLang(l) {
+            if (l === lang) return;
+            lang = l;
+            try { localStorage.setItem('kusina_lang', l); } catch (e) {}
+            applyLang();
+            const active = document.querySelector('#tabs button.active').dataset.tab;
+            loaders[active]();
+        }
+
+        async function api(path, opt = {}) {
+            const o = { method: opt.method || 'GET', headers: {} };
+            if (opt.body) { o.headers['Content-Type'] = 'application/json'; o.body = JSON.stringify(opt.body); }
+            let d = {};
+            try {
+                const r = await fetch(path, o);
+                if (r.status === 401) { location.href = '/admin/login'; return { error: '...' }; }
+                try { d = await r.json(); } catch (e) {}
+                if (!r.ok && !d.error) d.error = 'Error ' + r.status;
+            } catch (e) { d = { error: t('err_conn') }; }
+            return d;
+        }
+        function toast(m) { const e = $('toast'); e.textContent = m; e.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => e.classList.remove('show'), 3200); }
+        function fmt(iso) { if (!iso) return '—'; return new Date(iso).toLocaleString(lang === 'en' ? 'en-US' : 'fil-PH', { dateStyle: 'medium', timeStyle: 'short' }); }
+        function ini(n) { const p = String(n || '?').trim().split(/\s+/); return (p[0][0] + (p.length > 1 ? p[p.length - 1][0] : '')).toUpperCase(); }
+        function closeModal(id) { $(id).style.display = 'none'; }
+
+        const loaders = { overview: loadOverview, users: loadUsers, dishes: loadDishes, recipes: loadRecipes, chat: () => {} };
+        $('tabs').addEventListener('click', e => {
+            const b = e.target.closest('button[data-tab]'); if (!b) return;
+            document.querySelectorAll('#tabs button').forEach(x => x.classList.toggle('active', x === b));
+            document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.id === 'tab-' + b.dataset.tab));
+            loaders[b.dataset.tab]();
+        });
+
+        async function loadOverview() {
+            const s = await api('/admin/api/stats'); if (s.error) return toast(s.error);
+            $('stats').innerHTML = [[s.users, 'st_users'], [s.new_week, 'st_new'], [s.planning, 'st_planning'], [s.recipes, 'st_recipes'], [s.favorites, 'st_favs']]
+                .map(x => `<div class="stat"><b>${x[0]}</b><span>${esc(t(x[1]))}</span></div>`).join('');
+            const d = await api('/admin/api/dishes');
+            $('ovRecent').innerHTML = (d.recent || []).map(u => `<div class="rl"><span><b>${esc(u.name)}</b> <span class="muted">${esc(u.email)}</span></span><span class="muted">${esc(fmt(u.joined))}</span></div>`).join('') || `<div class="empty">${esc(t('no_users'))}</div>`;
+        }
+
+        let _ut; function debounceUsers() { clearTimeout(_ut); _ut = setTimeout(loadUsers, 250); }
+        async function loadUsers() {
+            const d = await api('/admin/api/users?q=' + encodeURIComponent($('userSearch').value)); if (d.error) return toast(d.error);
+            $('userRows').innerHTML = (d.users || []).map(u => `<tr>
+                <td><span class="avatar">${esc(ini(u.name))}</span><b>${esc(u.name)}</b><div class="muted" style="margin-left:44px">${esc(u.email)}</div></td>
+                <td class="muted">${esc(fmt(u.joined))}</td><td>${u.week_dishes}</td><td>${u.total_dishes}</td><td>${u.favorites}</td>
+                <td style="white-space:nowrap"><button class="btn btn-soft btn-sm" onclick="openUser(${u.id})"><i class="fa-solid fa-eye"></i> ${esc(t('view'))}</button>
+                <button class="btn btn-danger btn-sm" onclick="askDelete(${u.id}, '${esc(u.name).replace(/'/g, '')}')"><i class="fa-solid fa-user-minus"></i></button></td></tr>`).join('')
+                || `<tr><td colspan="6" class="empty">${esc(t('no_match'))}</td></tr>`;
+        }
+        function planHtml(plan) {
+            return DAYS.map(day => {
+                const m = (plan || {})[day] || {};
+                const parts = MEALS.filter(k => m[k] && m[k] !== '-').map(k => `${esc(mealL(k))}: ${esc(m[k])}`);
+                return parts.length ? `<div class="plan-day"><b>${esc(dayL(day))}</b> — ${parts.join(' • ')}</div>` : '';
+            }).join('');
+        }
+        async function openUser(id) {
+            const d = await api('/admin/api/users/' + id); if (d.error) return toast(d.error);
+            const u = d.user;
+            const hist = (d.history || []).map(h => `<h4 style="margin:12px 0 4px" class="muted">${esc(t('week_of', { d: h.start }))}</h4>${planHtml(h.plan)}`).join('');
+            $('userDetail').innerHTML = `
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;padding-right:40px"><span class="avatar" style="width:50px;height:50px;font-size:1rem;margin:0">${esc(ini(u.name))}</span>
+                <div><h3 style="font-family:'Fraunces',serif;font-size:1.3rem">${esc(u.name)}</h3><div class="muted">${esc(u.email)} · ${esc(t('joined_on', { d: fmt(u.joined) }))}</div></div></div>
+                <h4 style="margin:10px 0 6px">${esc(t('cal_week'))}</h4>${planHtml(d.plan) || `<div class="muted">${esc(t('no_dishes_user'))}</div>`}
+                ${hist ? `<h4 style="margin:16px 0 0">${esc(t('past_weeks'))}</h4>` + hist : ''}`;
+            $('userModal').style.display = 'flex';
+        }
+        let delId = null;
+        function askDelete(id, name) { delId = id; $('delText').textContent = t('del_text', { name }); $('delModal').style.display = 'flex'; }
+        async function confirmDelete() {
+            const d = await api('/admin/api/users/' + delId, { method: 'DELETE' }); closeModal('delModal');
+            if (d.error) return toast(d.error);
+            toast(t('t_deleted')); loadUsers();
+        }
+
+        async function loadDishes() {
+            const d = await api('/admin/api/dishes'); if (d.error) return toast(d.error);
+            const max = Math.max(1, ...(d.top || []).map(x => x.count));
+            $('topDishes').innerHTML = (d.top || []).map(x => `<div style="margin-bottom:10px"><div class="rl" style="border:none;padding:0"><b>${esc(x.dish)}</b><span class="muted">${x.count}×</span></div><div class="bar"><i style="width:${x.count / max * 100}%"></i></div></div>`).join('')
+                || `<div class="empty">${esc(t('no_dishes'))}</div>`;
+        }
+
+        async function loadRecipes() {
+            const d = await api('/admin/api/recipes'); if (d.error) return toast(d.error);
+            $('recTotal').textContent = t('total', { n: d.total });
+            $('catList').innerHTML = (d.categories || []).map(c => `<option value="${esc(c)}">`).join('');
+            $('recList').innerHTML = d.latest.map(r => `<div class="rl"><span><b>#${r.id}</b> ${esc(r.title)}</span><span class="muted">${esc(r.category)}</span></div>`).join('')
+                || `<div class="empty">${esc(t('no_csv'))}</div>`;
+        }
+        async function aiFill() {
+            const title = $('rTitle').value.trim(); if (!title) return toast(t('t_title_first'));
+            const b = $('aiFillBtn'); b.disabled = true; b.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ' + esc(t('ai_wait'));
+            const d = await api('/admin/api/ai_recipe', { method: 'POST', body: { title } });
+            b.disabled = false; b.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> ' + esc(t('ai_fill'));
+            if (d.error) return toast(d.error);
+            const r = d.recipe;
+            if (r.category) $('rCategory').value = r.category;
+            if (r.best_for) $('rBest').value = r.best_for;
+            if (r.ingredients) $('rIngr').value = r.ingredients;
+            if (r.instructions) $('rInstr').value = r.instructions;
+            if ([...$('rBudget').options].some(o => o.value === r.budget_level)) $('rBudget').value = r.budget_level;
+            toast(t('t_filled'));
+        }
+        async function saveRecipe() {
+            const b = $('saveRecipeBtn'); b.disabled = true;
+            const d = await api('/admin/api/recipes', { method: 'POST', body: {
+                title: $('rTitle').value, category: $('rCategory').value, budget_level: $('rBudget').value, best_for: $('rBest').value,
+                ingredients: $('rIngr').value, instructions: $('rInstr').value, image_url: $('rImg').value } });
+            b.disabled = false; if (d.error) return toast(d.error);
+            ['rTitle', 'rCategory', 'rBest', 'rIngr', 'rInstr', 'rImg'].forEach(i => $(i).value = '');
+            toast(t('t_added', { title: d.recipe.title })); loadRecipes();
+        }
+
+        let chatHist = [];
+        function addMsg(cls, html) { const c = $('chatBox'); c.insertAdjacentHTML('beforeend', `<div class="msg ${cls}">${html}</div>`); c.scrollTop = c.scrollHeight; }
+        function quickAsk(key) { $('chatInput').value = t(key); sendChat(); }
+        async function sendChat() {
+            const inp = $('chatInput'); const q = inp.value.trim(); if (!q) return;
+            inp.value = ''; addMsg('user', esc(q)); addMsg('ai', '<i class="fa-solid fa-ellipsis fa-fade"></i>');
+            const hist = chatHist.slice(-6); chatHist.push({ role: 'user', text: q });
+            const d = await api('/admin/api/chat', { method: 'POST', body: { query: q, history: hist } });
+            $('chatBox').lastElementChild.remove();
+            const reply = d.reply || d.error || t('err_generic');
+            chatHist.push({ role: 'ai', text: reply });
+            addMsg('ai', esc(reply).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>'));
+        }
+
+        applyLang();
+        loadOverview();
+    </script>
+</body>
+</html>
