@@ -53,6 +53,9 @@
         .empty { text-align:center; color:var(--muted); padding:2rem 1rem; }
         .grid2 { display:grid; grid-template-columns:1.3fr 1fr; gap:1.2rem; align-items:start; }
         .row2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        .who { display:flex; flex-wrap:wrap; gap:6px; margin-top:7px; }
+        .chip { background:var(--primary-soft); color:var(--primary-dark); font-size:.74rem; font-weight:700; padding:3px 10px; border-radius:20px; }
+        .chip small { font-weight:500; color:var(--muted); margin-left:4px; }
         .rl { display:flex; justify-content:space-between; gap:8px; padding:8px 0; border-bottom:1px dashed #e7e0d9; font-size:.86rem; }
         .bar { height:8px; border-radius:8px; background:var(--primary-soft); margin-top:4px; } .bar i { display:block; height:100%; border-radius:8px; background:var(--primary); }
         .modal-overlay { position:fixed; inset:0; background:rgba(28,25,23,.55); backdrop-filter:blur(4px); display:none; justify-content:center; align-items:center; z-index:200; padding:1rem; }
@@ -354,7 +357,8 @@
         async function loadDishes() {
             const d = await api('/admin/api/dishes'); if (d.error) return toast(d.error);
             const max = Math.max(1, ...(d.top || []).map(x => x.count));
-            $('topDishes').innerHTML = (d.top || []).map(x => `<div style="margin-bottom:10px"><div class="rl" style="border:none;padding:0"><b>${esc(x.dish)}</b><span class="muted">${x.count}×</span></div><div class="bar"><i style="width:${x.count / max * 100}%"></i></div></div>`).join('')
+            $('topDishes').innerHTML = (d.top || []).map(x => `<div style="margin-bottom:10px"><div class="rl" style="border:none;padding:0"><b>${esc(x.dish)}</b><span class="muted">${x.count}×</span></div><div class="bar"><i style="width:${x.count / max * 100}%"></i></div>
+                <div class="who">${(x.users || []).map(w => `<span class="chip" title="${esc(w.email)}">${esc(w.name)} <small>${esc(w.email)}</small>${w.count > 1 ? ' ×' + w.count : ''}</span>`).join('')}</div></div>`).join('')
                 || `<div class="empty">${esc(t('no_dishes'))}</div>`;
         }
 
