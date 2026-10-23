@@ -360,16 +360,19 @@ def api_delete_user(uid):
 @admin_required
 def api_dishes():
     """Mga ulam na pinaplano ng mga user (bilang), at ang pinakabagong sumali."""
-    counts, labels = {}, {}
+    counts, labels, who = {}, {}, {}
     for u in db.session.execute(db.select(User)).scalars().all():
         cur, hist, _ = load_store(u)
         for d in dishes_in(cur) + [x for p in hist.values() for x in dishes_in(p)]:
             k = d.lower()
             counts[k] = counts.get(k, 0) + 1
             labels.setdefault(k, d)
+            w = who.setdefault(k, {}).setdefault(u.id, {'name': u.name, 'email': u.email, 'count': 0})
+            w['count'] += 1
     top = sorted(counts.items(), key=lambda kv: -kv[1])[:25]
     recent = db.session.execute(db.select(User).order_by(User.id.desc()).limit(10)).scalars().all()
-    return jsonify({'top': [{'dish': labels[k], 'count': n} for k, n in top],
+    return jsonify({'top': [{'dish': labels[k], 'count': n,
+                             'users': sorted(who[k].values(), key=lambda x: -x['count'])} for k, n in top],
                     'recent': [{'name': u.name, 'email': u.email, 'joined': iso(u.created_at)} for u in recent]})
 
 
