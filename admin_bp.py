@@ -24,7 +24,6 @@ from functools import wraps
 
 from flask import Blueprint, jsonify, request, session, redirect, render_template
 from sqlalchemy import func
-from werkzeug.exceptions import HTTPException
 
 bp = Blueprint('kusina_admin', __name__, url_prefix='/admin')
 
@@ -91,21 +90,6 @@ def admin_required(fn):
     return wrapper
 
 
-@bp.errorhandler(Exception)
-def _api_error(e):
-    """Kapag may sira (hal. hindi maabot ang database), ibalik ang malinaw na mensahe sa halip na blangkong 500."""
-    if isinstance(e, HTTPException):
-        return e
-    try:
-        db.session.rollback()
-    except Exception:
-        pass
-    print('[ADMIN ERROR]', repr(e))
-    if request.path.startswith('/admin/api/'):
-        return jsonify({'error': 'Error sa database/server: ' + str(e)[:200]}), 500
-    raise e
-
-
 @bp.route('/login', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'GET':
@@ -164,7 +148,7 @@ def iso(dt):
 
 
 def load_store(u):
-    """Ibabalik ang (kasalukuyang plano, {linggo: plano}, linggo) mula sa plan_json ng user."""
+    """Ibabalik ang (kasalukuyang plano, {linggo: plano}) mula sa plan_json ng user."""
     try:
         raw = json.loads(u.plan_json) if u.plan_json else {}
     except Exception:
@@ -296,6 +280,26 @@ def gemini(prompt):
 # ---------------------------------------------------------------------------
 # API: STATS, USERS, DISHES
 # ---------------------------------------------------------------------------
+@bp.get('/api/debug')
+@admin_required
+def api_debug():
+    """Diagnostic: aling database ang kinakabit (walang password) at ilan ang users."""
+    out = {}
+    try:
+        url = db.engine.url
+        out['db_driver'] = url.drivername
+        out['db_host'] = url.host or '(local file)'
+        out['db_name'] = url.database
+    except Exception as e:
+        out['url_error'] = str(e)[:200]
+    try:
+        out['users_count'] = db.session.scalar(db.select(func.count(User.id)))
+        out['favorites_count'] = db.session.scalar(db.select(func.count(Favorite.id)))
+    except Exception as e:
+        out['query_error'] = str(e)[:300]
+    return jsonify(out)
+
+
 @bp.get('/api/stats')
 @admin_required
 def api_stats():
